@@ -116,12 +116,12 @@ void main(void) {
 
 
 //_______________________________________________RUTINAS PARA DISPLAYS_________________________________________________
-void separacion(void){
+void separacion(void){              // Separamos el contador en centenas, decenas y unidades
     temp = contador;
     
-    if(temp >= 100)
-        centenas = temp/100;
-        temp = temp%100;
+    if(temp >= 100)                 // vemos si sí tenemos que ver cuantas centenas hay
+        centenas = temp/100;        // vemos cuantas centenas hay
+        temp = temp%100;            // movemos el residuo a temp
     if(temp >= 10)
         decenas = temp/10;
         temp = temp%10;
@@ -130,7 +130,7 @@ void separacion(void){
 }
 
 void DSPsetup(void){ 
-        DSP1= DISPLAY[centenas];
+        DSP1= DISPLAY[centenas];    //movemos cada valor al display correspondiente ya codificado para los 7 segmentos usando un array.
         DSP2= DISPLAY[decenas];
         DSP3= DISPLAY[unidades];
     return;
