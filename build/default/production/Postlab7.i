@@ -1,4 +1,4 @@
-# 1 "Prelab7.c"
+# 1 "Postlab7.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,8 +6,15 @@
 # 1 "<built-in>" 2
 # 1 "C:/Program Files/Microchip/MPLABX/v6.00/packs/Microchip/PIC16Fxxx_DFP/1.3.42/xc8\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "Prelab7.c" 2
-# 11 "Prelab7.c"
+# 1 "Postlab7.c" 2
+
+
+
+
+
+
+
+
 #pragma config FOSC = INTRC_NOCLKOUT
 #pragma config WDTE = OFF
 #pragma config PWRTE = OFF
@@ -2643,19 +2650,15 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 # 29 "C:/Program Files/Microchip/MPLABX/v6.00/packs/Microchip/PIC16Fxxx_DFP/1.3.42/xc8\\pic\\include\\xc.h" 2 3
-# 28 "Prelab7.c" 2
+# 26 "Postlab7.c" 2
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.35\\pic\\include\\c90\\stdint.h" 1 3
-# 29 "Prelab7.c" 2
+# 27 "Postlab7.c" 2
+# 36 "Postlab7.c"
+uint8_t contador = 0,selectorDSP = 0,DSP1 = 0, DSP2 = 0, DSP3 = 0, unidades = 0, decenas = 0, centenas = 0, temp = 0;
 
 
-
-
-
-
-
-
-uint8_t contador = 0;
+uint8_t DISPLAY[10]= {0b00111111,0b00000110,0b01011011,0b01001111,0b01100110,0b01101101,0b01111101,0b00000111,0b01111111,0b01101111};
 
 
 
@@ -2670,10 +2673,33 @@ void __attribute__((picinterrupt(("")))) isr (void){
             contador -= 1;
             INTCONbits.RBIF = 0;
     }
+
+    if(T0IF){
+        if(selectorDSP < 4)
+           selectorDSP++;
+        else
+            selectorDSP = 0;
+
+        TMR0 = 249;
+        INTCONbits.T0IF = 0;
+
+    }
+
+
     return;
 }
 
+
+
+
+
 void setup(void);
+void DSPsetup(void);
+void separacion(void);
+
+
+
+
 
 void main(void) {
     setup();
@@ -2681,9 +2707,57 @@ void main(void) {
 
     while(1){
         PORTA = contador;
+
+        DSPsetup();
+        separacion();
+        switch(selectorDSP)
+    {
+        case 0:
+            PORTD = 0;
+            break;
+        case 1:
+            PORTD = 0;
+            PORTC = DSP1;
+            PORTDbits.RD0 = 1;
+            break;
+        case 2:
+            PORTD = 0;
+            PORTC = DSP2;
+            PORTDbits.RD1 = 1;
+            break;
+        case 3:
+            PORTD = 0;
+            PORTC = DSP3;
+            PORTDbits.RD2 = 1;
+            break;
+    }
+
     }
     return;
 }
+
+
+
+void separacion(void){
+    temp = contador;
+
+    if(temp >= 100)
+        centenas = temp/100;
+        temp = temp%100;
+    if(temp >= 10)
+        decenas = temp/10;
+        temp = temp%10;
+    if(temp >= 0)
+        unidades = temp;
+}
+
+void DSPsetup(void){
+        DSP1= DISPLAY[centenas];
+        DSP2= DISPLAY[decenas];
+        DSP3= DISPLAY[unidades];
+    return;
+}
+
 
 
  void setup(void){
@@ -2693,6 +2767,11 @@ void main(void) {
     TRISA = 0x00;
     PORTA = 0;
 
+    TRISC = 0x00;
+    PORTC = 0;
+
+    TRISD = 0x00;
+    PORTD = 0;
 
     TRISBbits.TRISB0 = 1;
     TRISBbits.TRISB1 = 1;
@@ -2702,11 +2781,22 @@ void main(void) {
 
     INTCONbits.GIE = 1;
     INTCONbits.RBIE = 1;
+    INTCONbits.T0IE = 1;
     IOCBbits.IOCB0 = 1;
     IOCBbits.IOCB1 = 1;
     INTCONbits.RBIF = 0;
+    INTCONbits.T0IF = 0;
 
-
-    OSCCONbits.IRCF = 0b0110;
+    OSCCONbits.IRCF = 0b0101;
     OSCCONbits.SCS = 1;
+
+
+    OPTION_REGbits.T0CS = 0;
+    OPTION_REGbits.T0SE = 0;
+    OPTION_REGbits.PSA = 0;
+    OPTION_REGbits.PS2 = 0;
+    OPTION_REGbits.PS1 = 1;
+    OPTION_REGbits.PS0 = 1;
+
+
 }
